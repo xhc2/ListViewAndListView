@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_height="match_parent">
+
+<com.example.pc.listviewandlistview.MyListView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+
+
+        <LinearLayout
+            android:id="@+id/ll_notedit"
+            android:layout_width="match_parent"
+            android:layout_height="118px"
+            android:orientation="horizontal"
+            android:background="#123123"
+            android:paddingLeft="48px" >
+
+            <TextView
+                android:id="@+id/tvnotedit"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:text="什么鬼"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/tvnoteditother"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:text="什么什么鬼"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <ListView
+            android:id="@+id/deviceall_fullyListview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#902342"
+            android:divider="@null" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="144px"
+            android:orientation="horizontal"
+            android:paddingLeft="48px" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:text="23423423"
+                android:textSize="15sp" />
+        </LinearLayout>
+
+        <ExpandableListView
+            android:id="@+id/deviceall_expandableListView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#234214"
+            android:divider="@null" />
+
+</com.example.pc.listviewandlistview.MyListView>
+</LinearLayout>
