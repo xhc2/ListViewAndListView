@@ -35,8 +35,8 @@ public class MainActivity extends AppCompatActivity {
         listView.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_expandable_list_item_1 , item));
         expandableListView.setAdapter(new ExpandAdapter(this));
 
-        llEdit.setVisibility(View.GONE);
-        expandableListView.setVisibility(View.GONE);
+//        llEdit.setVisibility(View.GONE);
+//        expandableListView.setVisibility(View.GONE);
 //        llText.setVisibility(View.GONE);
 //        listView.setVisibility(View.GONE);
 
