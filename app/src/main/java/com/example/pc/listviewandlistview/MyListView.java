@@ -71,7 +71,6 @@ public class MyListView extends LinearLayout {
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         int widthSize = MeasureSpec.getSize(widthMeasureSpec);
         int heightSize = MeasureSpec.getSize(heightMeasureSpec);
-        // int view2Height = 0;
         int count = getChildCount();
         headHeight = 0;
         for (int i = 0; i < count; ++i) {
@@ -90,6 +89,7 @@ public class MyListView extends LinearLayout {
 
         for (int i = 0; i < count - 1; ++i) {
             View view = getChildAt(i);
+            Log.e("xhc","什么情况 500 duo "+view.getMeasuredHeight());
             headHeight += view.getMeasuredHeight();
         }
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -341,7 +341,7 @@ public class MyListView extends LinearLayout {
         if (!listView.isShown() || !expandableListView.isShown()) {
             return;
         }
-
+        Log.e("xhc","什么情况---height "+headHeight+" y "+y);
         if (y <= 0) {
             y = 0;
         } else if (y >= headHeight) {
