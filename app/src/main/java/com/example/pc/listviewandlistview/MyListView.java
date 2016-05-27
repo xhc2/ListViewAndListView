@@ -64,7 +64,7 @@ public class MyListView extends LinearLayout {
     }
 
     private int headHeight = 0;
-
+    private int titleHeight = 0 ;
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
@@ -76,10 +76,14 @@ public class MyListView extends LinearLayout {
         for (int i = 0; i < count; ++i) {
             View view = getChildAt(i);
 
-            measureChildWithMargins(view, widthMeasureSpec, 0, MeasureSpec.UNSPECIFIED, 0);
-            // if (i == count - 2) {
-            // view2Height = view.getMeasuredHeight();
-            // }
+            measureChild(view , widthMeasureSpec , heightMeasureSpec);
+            if(i == 0){
+                if(view.isShown()){
+                    titleHeight = view.getMeasuredHeight();
+                };
+            }
+
+
             if (view instanceof ExpandableListView) {
                 ExpandableListView listView = (ExpandableListView) view;
                 LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, heightSize /*- view2Height*/);
@@ -89,8 +93,8 @@ public class MyListView extends LinearLayout {
 
         for (int i = 0; i < count - 1; ++i) {
             View view = getChildAt(i);
-            Log.e("xhc","什么情况 500 duo "+view.getMeasuredHeight());
             headHeight += view.getMeasuredHeight();
+            Log.e("xhc","什么情况 500 duo "+headHeight);
         }
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
@@ -139,12 +143,12 @@ public class MyListView extends LinearLayout {
                         // 向上滑
                         direction = UP;
                         scrollBy(0, (int) (deltaY + 0.5));
-                        invalidate();
+//                        invalidate();
                     } else if (deltaY <= 0 && expandListViewIsTop()) {
                         // 向下滑
                         direction = DOWN;
                         scrollBy(0, (int) (deltaY + 0.5));
-                        invalidate();
+//                        invalidate();
                     }
 
                 }
@@ -157,7 +161,7 @@ public class MyListView extends LinearLayout {
                     direction = yVelocity > 0 ? DOWN : UP; // 下滑速度大于0，上滑速度小于0
                     scroller.fling(0, getScrollY(), 0, -(int) yVelocity, 0, 0, -Integer.MAX_VALUE, Integer.MAX_VALUE);
 
-                    invalidate(); // 更新界面，该行代码会导致computeScroll中的代码执行
+//                    invalidate(); // 更新界面，该行代码会导致computeScroll中的代码执行
 
 //				if ((shiftX > mTouchSlop || shiftY > mTouchSlop)) {
 //					int action = ev.getAction();
@@ -189,15 +193,24 @@ public class MyListView extends LinearLayout {
 
         // 滑动的动画还没结束
         if (scroller.computeScrollOffset()) {
-            Log.e("xhc", "--------------computeScroll------------");
             final int currY = scroller.getCurrY();
             // Log.e("xhc","curry "+currY + direction);
             if (direction == UP) {
                 // 向上滑动
                 if (!listViewIsBottom()) {
+                    //listview 还没有到bottom
 //					scroller.abortAnimation();
                     return;
-                } else if (!headGone()) {
+                }
+                else if(!titleGone()){
+                    Log.e("xhc","-------------------------------------title gone");
+                    int deltaY = (currY - mLastScrollerY);
+                    deltaY /= 1.5;
+                    int toY = getScrollY() + deltaY;
+                    scrollTo(0, toY); // 将外层布局滚动到指定位置
+//                    invalidate(); // 移动完后刷新界面
+                }
+                else if (!headGone()) {
                     // 头部还没有滑动完
                     int deltaY = (currY - mLastScrollerY);
                     deltaY /= 1.5;
@@ -234,6 +247,10 @@ public class MyListView extends LinearLayout {
             mLastScrollerY = currY;
         }
 
+    }
+
+    private boolean titleGone(){
+        return currY >= titleHeight;
     }
 
     // 速度
@@ -331,7 +348,6 @@ public class MyListView extends LinearLayout {
             listView.scrollTo(0, 0);
         }
         if (expandableListView != null) {
-
             expandableListView.scrollTo(0, 0);
         }
     }
