@@ -51,8 +51,24 @@ public class MyListView extends LinearLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        listView = (ListView) getChildAt(1);
-        expandableListView = (ExpandableListView) getChildAt(3);
+        int count = getChildCount();
+        Log.e("xhc","加载完毕----"+count );
+        for(int i = 0 ;i < count ; ++ i){
+            View view = getChildAt(i);
+            if(view instanceof  ExpandableListView){
+                Log.e("xhc","---zheil ---expandlistview");
+                expandableListView = (ExpandableListView)view;
+
+            }
+            else if(view instanceof  ListView){
+                Log.e("xhc","--这里---listview");
+                listView = (ListView) view;
+            }
+        }
+
+
+
+
     }
 
 
@@ -71,25 +87,25 @@ public class MyListView extends LinearLayout {
             View view = getChildAt(i);
 
             measureChildWithMargins(view, widthMeasureSpec, 0, MeasureSpec.UNSPECIFIED, 0);
-            if (i == 2) {
+            if (i == count - 2) {
                 view2Height = view.getMeasuredHeight();
             }
             if (view instanceof ExpandableListView) {
                 ExpandableListView listView = (ExpandableListView) view;
-                LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, heightSize - view2Height);
+                LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, heightSize /*- view2Height*/);
                 listView.setLayoutParams(params);
             }
         }
 
-        for (int i = 0; i < 2; ++i) {
+        for (int i = 0; i < count - 1  ; ++i) {
             View view = getChildAt(i);
-            headHeight += view.getHeight();
+            headHeight += view.getMeasuredHeight();
         }
-
+        Log.e("xhc","child count "+getChildCount());
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
-    private int direction = 0;
+    private int direction = -1;
     private int UP = 0 ;
     private int DOWN = 2 ;
     private boolean verticalScrollFlag = false;   //是否允许垂直滚动
@@ -140,38 +156,63 @@ public class MyListView extends LinearLayout {
                     }
 
                 }
-                listViewIsBottom();
+                Log.e("xhc","scroll Y "+getScrollY());
                 break;
             case MotionEvent.ACTION_UP:
                 if(verticalScrollFlag){
                     mVelocityTracker.computeCurrentVelocity(1000, mMaximumVelocity); //1000表示单位，每1000毫秒允许滑过的最大距离是mMaximumVelocity
                     float yVelocity = mVelocityTracker.getYVelocity();  //获取当前的滑动速度
+                    direction = yVelocity > 0 ? DOWN : UP;  //下滑速度大于0，上滑速度小于0
+                    Log.e("xhc", "速度-> " + yVelocity);
                     scroller.fling(0, getScrollY(), 0, -(int) yVelocity, 0, 0, -Integer.MAX_VALUE, Integer.MAX_VALUE);
-                    mLastScrollerY = getScrollY();
+
+                    invalidate();  //更新界面，该行代码会导致computeScroll中的代码执行
+
+
+//                    if ((shiftX > mTouchSlop || shiftY > mTouchSlop)) {
+//                            int action = ev.getAction();
+//                            ev.setAction(MotionEvent.ACTION_CANCEL);
+//                            boolean dd = super.dispatchTouchEvent(ev);
+//                            ev.setAction(action);
+//                            return dd;
+//                    }
                 }
+                mLastScrollerY = getScrollY();
+
+
                 recycleVelocityTracker();
                 break;
             case MotionEvent.ACTION_CANCEL:
                 recycleVelocityTracker();
                 break;
         }
-        return super.dispatchTouchEvent(ev);
+        super.dispatchTouchEvent(ev);
+        return true;
+    }
+
+    public void fling(int velocityY, int distance, int duration){
+        scroller.fling(0, getScrollY(), 0, velocityY, 0, 0, -Integer.MAX_VALUE, Integer.MAX_VALUE);
+        invalidate();
     }
 
     @Override
     public void computeScroll() {
-        super.computeScroll();
 
         //滑动的动画还没结束
         if(scroller.computeScrollOffset()){
             final int currY = scroller.getCurrY();
-            Log.e("xhc","curry "+currY + direction);
+//            Log.e("xhc","curry "+currY + direction);
             if(direction == UP){
                 //向上滑动
-                if(!headGone()){
+                if(!listViewIsBottom()){return ;}
+                else if(!headGone()){
                     //头部还没有滑动完
-                    int toY = currY - mLastScrollerY;
-                    scrollTo(0, currY);  //将外层布局滚动到指定位置
+                    Log.e("xhc"," computeScroll mLastScrollerY "+mLastScrollerY +" curry "+currY);
+                    int deltaY = (currY - mLastScrollerY);
+                    deltaY /= 1.5;
+                    Log.e("xhc","--deltaY---"+deltaY);
+                    int toY = getScrollY() + deltaY;
+                    scrollTo(0, toY);  //将外层布局滚动到指定位置
                     invalidate();        //移动完后刷新界面
                 }
                 else{
@@ -188,23 +229,28 @@ public class MyListView extends LinearLayout {
             }
             else if(direction == DOWN){
                 //向下滑动
-                if(headGone() || (!headGone() && currY > 0)){
-                    //头部在完全在屏幕外 , 或者部分在屏幕外
-                    scrollTo(0, currY);  //将外层布局滚动到指定位置
-                    invalidate();
-                }
-                else{
-                    scroller.abortAnimation();
+                if(!expandListViewIsTop()){
+                    //如果expandlistview自己还可以滑动，就滑动自己
                     int distance = scroller.getFinalY() - currY; //剩余的距离
                     int duration = calcDuration(scroller.getDuration(), scroller.timePassed()); //除去布局滚动的距离后，剩余的距离
-                    listView.smoothScrollBy(distance ,duration);
+                    expandableListView.smoothScrollBy(distance, duration);
                 }
+                else{
+                    //头部在完全在屏幕外 , 或者部分在屏幕外
+                    int deltaY = (currY - mLastScrollerY);
+                    int toY = getScrollY() + deltaY;
+                    scrollTo(0, toY);
+                    invalidate();
+
+                }
+
             }
             mLastScrollerY = currY;
         }
 
-
     }
+
+
 
     //速度
     private int getScrollerVelocity(int distance, int duration) {
@@ -221,9 +267,16 @@ public class MyListView extends LinearLayout {
     }
     private void recycleVelocityTracker() {
         if (mVelocityTracker != null) {
+
             mVelocityTracker.recycle();
             mVelocityTracker = null;
+
         }
+    }
+
+    //判断这个控件是否滑动到了顶部
+    public boolean isTop(){
+        return getScrollY() <= 0;
     }
 
     private void obtainVelocityTracker(MotionEvent event) {
@@ -272,6 +325,11 @@ public class MyListView extends LinearLayout {
 
     @Override
     public void scrollTo(int x, int y) {
+        if(!listView.isShown() || !expandableListView.isShown()){
+            return ;
+        }
+
+
         if(y <= 0){
             y = 0 ;
         }
@@ -283,15 +341,22 @@ public class MyListView extends LinearLayout {
         super.scrollTo(x, y);
     }
 
+
+
     @Override
     public void scrollBy(int x, int y) {
+
+
         int sY = getScrollY();
         int toY = sY + y;
+        Log.e("xhc"," head height "+headHeight+" to Y "+toY);
+
         if (toY <= 0) {
             //预防向下滑动超出边界
             toY = 0;
 
         } else if (toY >= headHeight) {
+
             toY = headHeight;
         }
         y = toY - sY;

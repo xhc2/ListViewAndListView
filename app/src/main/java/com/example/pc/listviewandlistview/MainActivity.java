@@ -10,6 +10,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.ExpandableListView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 
 public class MainActivity extends AppCompatActivity {
@@ -26,11 +27,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void findView(){
+        LinearLayout llText = (LinearLayout) findViewById(R.id.ll_notedit);
+        LinearLayout llEdit = (LinearLayout) findViewById(R.id.lledit);
         listView = (ListView)findViewById(R.id.deviceall_fullyListview);
         expandableListView = (ExpandableListView) findViewById(R.id.deviceall_expandableListView);
         String[] item = new String[]{"123","45341","123","45341","123","45341","123","45341","123","45341","123","45341","123","45341","123","45341"};
         listView.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_expandable_list_item_1 , item));
         expandableListView.setAdapter(new ExpandAdapter(this));
+
+        llEdit.setVisibility(View.GONE);
+        expandableListView.setVisibility(View.GONE);
+//        llText.setVisibility(View.GONE);
+//        listView.setVisibility(View.GONE);
+
 
     }
 }
